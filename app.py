@@ -2,17 +2,19 @@ from models import Base, engine, session, Product
 
 import datetime
 import csv
+import time
 
 def menu():
     while True:
         print(
         """
-            \nINVENTORY MANAGEMENT SYSTEM
+            \n======== MENU ========
             \rPlease choose one of the options below:
             \rv - View product details
             \ra - Add a new product
             \rb - Backup products database
             \rq - Quit
+            \r========================
         """
         )
 
@@ -37,6 +39,32 @@ def clean_price(price_str):
 def clean_date(date_str):
     return datetime.datetime.strptime(date_str, '%m/%d/%Y').date()
 
+def clean_id(id_str, options):
+    try:
+        product_id = int(id_str)
+    except ValueError:
+        input("""
+              \n====== ID ERROR ======
+              \rThe id should be a number.
+              \rPress Enter to try again.
+              \r==========================""")
+        return
+    else:
+        if product_id in options:
+            return product_id
+        else:
+            input(f"""
+                  \n====== ID ERROR ======
+                  \rThe id {product_id} is not in the database.
+                  \rPlease choose one of the following ids: {options}
+                  \rPress Enter to try again.
+                  \r==========================""")
+            return
+
+
+def convert_date(date_obj):
+    return date_obj.strftime('%-m/%-d/%Y')
+    
 def read_csv():
     with open('inventory.csv', newline='') as csvfile:
         data = csv.DictReader(csvfile, delimiter=',')
@@ -66,9 +94,53 @@ def add_csv_to_db():
             session.add(new_product)
     session.commit()
 
+def display_product_by_id():
+    id_options = []
+    for product in session.query(Product):
+        id_options.append(product.product_id)
+    id_error = True
+    while id_error:
+        id_choice = input(f"""
+            \nId Options: {id_options}
+            \rProduct id: """)
+        id_choice = clean_id(id_choice, id_options)
+        if type(id_choice) == int:
+            id_error = False
+            the_product = session.query(Product).filter(Product.product_id == id_choice).first()
+            print(f"""
+                  \n====== PRODUCT DETAILS ======
+                  \rProduct ID: {the_product.product_id}
+                  \rName: {the_product.product_name}
+                  \rPrice: ${the_product.product_price / 100}
+                  \rQuantity: {the_product.product_quantity}
+                  \rDate Updated: {convert_date(the_product.date_updated)}
+                  \r==========================""")
+            time.sleep(2)
+   
+
+def app():
+    app_running = True
+    while app_running:
+        choice = menu()
+        if choice == 'v':
+            # View product details
+            display_product_by_id()
+        elif choice == 'a':
+            # Add a new product
+            pass
+        elif choice == 'b':
+            # Backup products database
+            pass
+        else:
+            # Quit the app
+            print("GOODBYE!")
+            app_running = False
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine) # Create the database and tables
     add_csv_to_db() # Add the products from the CSV file to the database
-    
-    for product in session.query(Product):
-        print(product)
+    app() # Start the app
+
+
+    # for product in session.query(Product):
+    #     print(f'{product.product_id} | {product.product_name} | {product.product_quantity} | {product.product_price}| {product.date_updated}')
