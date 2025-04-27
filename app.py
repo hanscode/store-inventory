@@ -82,7 +82,13 @@ def add_csv_to_db():
     data = read_csv()
     for row in data:
         product_in_db = session.query(Product).filter_by(product_name=row['product_name']).one_or_none()
-        if product_in_db == None:
+        if product_in_db:
+            if row['date_updated'] > product_in_db.date_updated: 
+                product_in_db.product_quantity = row['product_quantity']
+                product_in_db.product_price = row['product_price']
+                product_in_db.date_updated = row['date_updated']
+                session.commit()
+        else:
             new_product = Product(
                 product_name=row['product_name'],
                 product_quantity=row['product_quantity'],
@@ -118,26 +124,49 @@ def display_product_by_id():
 
 def add_product_to_db():
     name = input("Product name: ")
-    price_error = True
-    while price_error:
-        price = input("Product price (e.g. 10.99 or $10.99): ")
-        price = clean_price(price)
-        if type(price) == int:
-            price_error = False
-    quantity = input("Product quantity: ")
-    date_updated = datetime.datetime.now().date()
+    product_in_db = session.query(Product).filter_by(product_name=name).one_or_none()
+    if product_in_db:
+        print(f"The product '{name}' already exists. It was last updated on {convert_date(product_in_db.date_updated)}.")
+        update_choice = input("Do you want to update the product details? (y/n): ").lower()
+        if update_choice == 'y':
+            price_error = True
+            while price_error:
+                price = input("Product price (e.g. 10.99 or $10.99): ")
+                price = clean_price(price)
+                if type(price) == int:
+                    price_error = False
+            quantity = input("Product quantity: ")
+            date_updated = datetime.datetime.now().date()
+            product_in_db.product_price = price
+            product_in_db.product_quantity = quantity
+            product_in_db.date_updated = date_updated
+            session.commit()
+            print(f"Product {name} updated successfully!")
+        else:
+            print("No changes made.")
+            time.sleep(2)
+            return
+    else:
+        price_error = True
+        while price_error:
+            price = input("Product price (e.g. 10.99 or $10.99): ")
+            price = clean_price(price)
+            if type(price) == int:
+                price_error = False
+        quantity = input("Product quantity: ")
+        date_updated = datetime.datetime.now().date()
 
-    new_product = Product(
-        product_name=name,
-        product_price=price,
-        product_quantity=quantity,
-        date_updated=date_updated
-    )
-    
-    session.add(new_product)
-    session.commit()
-    print(f"Product {name} added successfully!")
-    time.sleep(2)
+        new_product = Product(
+            product_name=name,
+            product_price=price,
+            product_quantity=quantity,
+            date_updated=date_updated
+        )
+        
+        session.add(new_product)
+        session.commit()
+        print(f"Product {name} added successfully!")
+        time.sleep(2)
 
 def backup_db():
     with open('backup.csv', 'w', newline='') as csvfile: # the 'w' mode will overwrite the file if it exists
@@ -177,6 +206,7 @@ if __name__ == "__main__":
     add_csv_to_db() # Add the products from the CSV file to the database
     app() # Start the app
 
-
+    # The following code is for testing purposes only
+    # Uncomment to see all products in the database
     # for product in session.query(Product):
     #     print(f'{product.product_id} | {product.product_name} | {product.product_quantity} | {product.product_price}| {product.date_updated}')
