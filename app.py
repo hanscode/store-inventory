@@ -55,7 +55,7 @@ def clean_id(id_str, options):
         else:
             input(f"""
                   \n====== ID ERROR ======
-                  \rThe id {product_id} is not in the database.
+                  \rThe product id {product_id} is not in the database.
                   \rPlease choose one of the following ids: {options}
                   \rPress Enter to try again.
                   \r==========================""")
@@ -116,7 +116,30 @@ def display_product_by_id():
                   \rDate Updated: {convert_date(the_product.date_updated)}
                   \r==========================""")
             time.sleep(2)
-   
+
+
+def add_product_to_db():
+    name = input("Product name: ")
+    price_error = True
+    while price_error:
+        price = input("Product price (e.g. 10.99 or $10.99): ")
+        price = clean_price(price)
+        if type(price) == int:
+            price_error = False
+    quantity = input("Product quantity: ")
+    date_updated = datetime.datetime.now().date()
+
+    new_product = Product(
+        product_name=name,
+        product_price=price,
+        product_quantity=quantity,
+        date_updated=date_updated
+    )
+    
+    session.add(new_product)
+    session.commit()
+    print(f"Product {name} added successfully!")
+    time.sleep(2)
 
 def app():
     app_running = True
@@ -127,7 +150,7 @@ def app():
             display_product_by_id()
         elif choice == 'a':
             # Add a new product
-            pass
+            add_product_to_db()
         elif choice == 'b':
             # Backup products database
             pass
