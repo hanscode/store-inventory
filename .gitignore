@@ -27,6 +27,5 @@ error.log
 # Don't include these files in the repository
 # but keep them in the local directory for testing
 # and development purposes
-#inventory.db
-#backup.csv
-test.py
+inventory.db
+backup.csv

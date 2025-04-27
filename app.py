@@ -29,8 +29,6 @@ def menu():
 
 
 def clean_price(price_str):
-    if ',' in price_str:
-        price_str = price_str.replace(',', '.')
     if '$' in price_str:
         price_str = price_str.replace('$', '')
     price = float(price_str)
@@ -141,6 +139,21 @@ def add_product_to_db():
     print(f"Product {name} added successfully!")
     time.sleep(2)
 
+def backup_db():
+    with open('backup.csv', 'w', newline='') as csvfile: # the 'w' mode will overwrite the file if it exists
+        fieldnames = ['product_name', 'product_price', 'product_quantity', 'date_updated']
+        product_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        product_writer.writeheader()
+        for product in session.query(Product):
+            product_writer.writerow({
+                'product_name': product.product_name,
+                'product_price': f"${product.product_price / 100:.2f}",
+                'product_quantity': product.product_quantity,
+                'date_updated': convert_date(product.date_updated)
+            })
+    print("Backup completed successfully!")
+    time.sleep(2)
+
 def app():
     app_running = True
     while app_running:
@@ -153,7 +166,7 @@ def app():
             add_product_to_db()
         elif choice == 'b':
             # Backup products database
-            pass
+            backup_db()
         else:
             # Quit the app
             print("GOODBYE!")
