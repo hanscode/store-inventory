@@ -8,8 +8,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 Base = declarative_base()
 
-# Create a model called Product that the SQLAlchemy ORM will use to build the database. The Product model should have five attributes: product_id, product_name, product_quantity, product_price, and date_updated. Use SQLALchemy’s built-in primary_key functionality for the product_id field, so that each product will have an automatically generated unique identifier.
-
 class Product(Base):
     __tablename__ = 'products'
     product_id = Column(Integer, primary_key=True)
