@@ -29,10 +29,17 @@ def menu():
 
 
 def clean_price(price_str):
-    if '$' in price_str:
-        price_str = price_str.replace('$', '')
-    price = float(price_str)
-    return int(price * 100)
+    try:
+        price_float = float(price_str.replace('$', '').strip())
+    except ValueError:
+        input("""
+              \n====== PRICE ERROR ======
+              \rThe price should be in the format of 10.99 or $10.99.
+              \rPress Enter to try again.
+              \r==========================""")
+        return None
+    else:
+        return int(price_float * 100)
     
 def clean_date(date_str):
     return datetime.datetime.strptime(date_str, '%m/%d/%Y').date()
@@ -142,6 +149,7 @@ def add_product_to_db():
             product_in_db.date_updated = date_updated
             session.commit()
             print(f"Product {name} updated successfully!")
+            time.sleep(2)
         else:
             print("No changes made.")
             time.sleep(2)
