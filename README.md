@@ -2,8 +2,6 @@
 ### Project 4 - Store Inventory with SQLAlchemy  
 **Author** - Hans Steffens  
 
----
-
 ## Project Overview
 
 This is a Python console application that allows you to easily manage a store's inventory.
@@ -83,10 +81,6 @@ store-inventory/
 ├── requirements.txt     # Project dependencies
 └── README.md            # This file
 ```
-## Notes
-- When adding new products, if the product name already exists in the database, the app will only update the existing record if the new data has a more recent date_updated.
-- All prices are stored internally as integer cents for better precision (e.g., $9.99 is stored as 999 cents).
-- Date fields are stored as proper datetime.date objects in the database.
 
 ## License
 This project is licensed under the [MIT LICENSE](LICENSE).
