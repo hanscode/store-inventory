@@ -51,9 +51,24 @@ def read_csv():
             products.append(product)
         return products
 
+
+def add_csv_to_db():
+    data = read_csv()
+    for row in data:
+        product_in_db = session.query(Product).filter_by(product_name=row['product_name']).one_or_none()
+        if product_in_db == None:
+            new_product = Product(
+                product_name=row['product_name'],
+                product_quantity=row['product_quantity'],
+                product_price=row['product_price'],
+                date_updated=row['date_updated']
+            )
+            session.add(new_product)
+    session.commit()
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine) # Create the database and tables
-    products = read_csv() # Read the CSV file
-    for product in products:
+    add_csv_to_db() # Add the products from the CSV file to the database
+    
+    for product in session.query(Product):
         print(product)
-     
