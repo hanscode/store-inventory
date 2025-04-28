@@ -49,10 +49,12 @@ def menu():
         if choice in ['v', 'a', 'b', 'q']:
             return choice
         else:
-             input("""
-              \rPlease choose one of the options above.
-              \r v, a, b, or q
-              \rPress Enter to try again.""")
+            print(f"""
+                  \n====== INPUT ERROR ======
+                  \rThe option '{choice}' is not valid.
+                  \rPlease choose v, a, b, or q.
+                  \r==========================""")
+            time.sleep(1.5)
 
 
 def clean_price(price_str):
