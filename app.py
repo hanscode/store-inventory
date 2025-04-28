@@ -28,13 +28,14 @@ import datetime
 import csv
 import time
 
+
 def menu():
     """
     Displays the menu options to the user and returns the user's choice.
     """
     while True:
         print(
-        """
+            """
             \n======== MENU ========
             \rPlease choose one of the options below:
             \rv - View product details
@@ -42,7 +43,7 @@ def menu():
             \rb - Backup products database
             \rq - Quit
             \r========================
-        """
+            """
         )
 
         choice = input("What would you like to do? ").lower()
@@ -59,11 +60,12 @@ def menu():
 
 def clean_price(price_str):
     """
-    Cleans the price string by removing the dollar sign and converts it to an integer in cents.
+    Cleans the price string by removing the dollar sign and converts it
+    to an integer in cents.
 
     Args:
         price_str (str): Price as a string, e.g., "$9.99" or "9.99".
-    
+
     Returns:
         int: Price in cents as an integer.
     """
@@ -78,18 +80,20 @@ def clean_price(price_str):
         return None
     else:
         return int(price_float * 100)
-    
+
+
 def clean_date(date_str):
     """
     Cleans the date string and converts it to a datetime.date object.
 
     Args:
         date_str (str): Date as a string, e.g., "01/01/2023".
-    
+
     Returns:
         datetime.date: Date as a datetime.date object.
     """
     return datetime.datetime.strptime(date_str, '%m/%d/%Y').date()
+
 
 def clean_id(id_str, options):
     """
@@ -100,7 +104,8 @@ def clean_id(id_str, options):
         options (list): A list of valid product IDs.
 
     Returns:
-        int or None: The valid product ID as an integer if valid, otherwise None.
+        int or None: The valid product ID as an integer if valid,
+        otherwise None.
     """
     try:
         product_id = int(id_str)
@@ -135,7 +140,8 @@ def convert_date(date_obj):
         str: The formatted date as 'M/D/YYYY'.
     """
     return date_obj.strftime('%-m/%-d/%Y')
-    
+
+
 def read_csv():
     """
     Reads the inventory CSV file and processes each product entry.
@@ -161,14 +167,17 @@ def add_csv_to_db():
     """
     Adds or updates products from the CSV file into the database.
 
-    If a product already exists, updates it only if the CSV data is more recent.
+    If a product already exists, updates it only if the CSV data is more
+    recent.
     Otherwise, inserts new products.
     """
     data = read_csv()
     for row in data:
-        product_in_db = session.query(Product).filter_by(product_name=row['product_name']).one_or_none()
+        product_in_db = session.query(Product).filter_by(
+            product_name=row['product_name']
+        ).one_or_none()
         if product_in_db:
-            if row['date_updated'] > product_in_db.date_updated: 
+            if row['date_updated'] > product_in_db.date_updated:
                 product_in_db.product_quantity = row['product_quantity']
                 product_in_db.product_price = row['product_price']
                 product_in_db.date_updated = row['date_updated']
@@ -183,9 +192,11 @@ def add_csv_to_db():
             session.add(new_product)
     session.commit()
 
+
 def display_product_by_id():
     """
-    Prompts the user to enter a product ID and displays the corresponding product details.
+    Prompts the user to enter a product ID and displays the corresponding
+    product details.
 
     Displays product name, price, quantity, and last update date.
     """
@@ -200,7 +211,9 @@ def display_product_by_id():
         id_choice = clean_id(id_choice, id_options)
         if type(id_choice) == int:
             id_error = False
-            the_product = session.query(Product).filter(Product.product_id == id_choice).first()
+            the_product = session.query(Product).filter(
+                Product.product_id == id_choice
+            ).first()
             print(f"""
                   \n====== PRODUCT DETAILS ======
                   \rProduct ID: {the_product.product_id}
@@ -216,13 +229,20 @@ def add_product_to_db():
     """
     Adds a new product to the database.
 
-    Prompts the user for product name, price, and quantity. The current date is used for 'date_updated'.
+    Prompts the user for product name, price, and quantity.
+    The current date is used for 'date_updated'.
     """
     name = input("Product name: ")
-    product_in_db = session.query(Product).filter_by(product_name=name).one_or_none()
+    product_in_db = session.query(Product).filter_by(
+        product_name=name
+    ).one_or_none()
     if product_in_db:
-        print(f"The product '{name}' already exists. It was last updated on {convert_date(product_in_db.date_updated)}.")
-        update_choice = input("Do you want to update the product details? (y/n): ").lower()
+        print(
+            f"The product '{name}' already exists. It was last updated on "
+            f"{convert_date(product_in_db.date_updated)}."
+        )
+        update_prompt = "Do you want to update the product details? (y/n): "
+        update_choice = input(update_prompt).lower()
         if update_choice == 'y':
             price_error = True
             while price_error:
@@ -258,20 +278,27 @@ def add_product_to_db():
             product_quantity=quantity,
             date_updated=date_updated
         )
-        
+
         session.add(new_product)
         session.commit()
         print(f"Product {name} added successfully!")
         time.sleep(2)
 
+
 def backup_db():
     """
     Creates a backup of the database by exporting all products to a CSV file.
 
-    The backup file is named 'backup.csv' and will overwrite any existing backup.
+    The backup file is named 'backup.csv' and will overwrite any existing
+    backup.
     """
-    with open('backup.csv', 'w', newline='') as csvfile: # the 'w' mode will overwrite the file if it exists
-        fieldnames = ['product_name', 'product_price', 'product_quantity', 'date_updated']
+    with open('backup.csv', 'w', newline='') as csvfile:
+        fieldnames = [
+            'product_name',
+            'product_price',
+            'product_quantity',
+            'date_updated'
+        ]
         product_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         product_writer.writeheader()
         for product in session.query(Product):
@@ -284,12 +311,14 @@ def backup_db():
     print("Backup completed successfully!")
     time.sleep(2)
 
+
 def app():
     """
     Main app loop.
 
-    Presents a menu to the user, processes the selected option, and performs actions like 
-    viewing a product, adding a product, backing up the database, or exiting the app.
+    Presents a menu to the user, processes the selected option, and performs
+    actions like viewing a product, adding a product, backing up the database,
+    or exiting the app.
     """
     app_running = True
     while app_running:
@@ -308,12 +337,17 @@ def app():
             print("GOODBYE!")
             app_running = False
 
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
-    add_csv_to_db() 
+    add_csv_to_db()
     app()
 
     # The following code is for testing purposes only
     # Uncomment to see all products in the database
     # for product in session.query(Product):
-    #     print(f'{product.product_id} | {product.product_name} | {product.product_quantity} | {product.product_price}| {product.date_updated}')
+    #     print(
+    #         f'{product.product_id} | {product.product_name} | '
+    #         f'{product.product_quantity} | {product.product_price} | '
+    #         f'{product.date_updated}'
+    #     )
