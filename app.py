@@ -58,6 +58,27 @@ def menu():
             time.sleep(1.5)
 
 
+def clean_product_name():
+    """
+    Prompts the user for a product name and returns it.
+
+    Returns:
+        str: The cleaned product name.
+    """
+    try:
+        product_name = input("Product name: ").strip()
+        if not product_name:
+            raise ValueError("Product name cannot be empty.")
+    except ValueError as e:
+        print(f"""
+              \n====== NAME ERROR ======
+              \r{e}
+              \r==========================""")
+        time.sleep(1.5)
+        return clean_product_name()
+    return product_name
+
+
 def clean_price(price_str):
     """
     Cleans the price string by removing the dollar sign and converts it
@@ -232,7 +253,7 @@ def add_product_to_db():
     Prompts the user for product name, price, and quantity.
     The current date is used for 'date_updated'.
     """
-    name = input("Product name: ")
+    name = clean_product_name()
     product_in_db = session.query(Product).filter_by(
         product_name=name
     ).one_or_none()
